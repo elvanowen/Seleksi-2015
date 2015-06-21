@@ -33,14 +33,15 @@
     function initialize() {
       var mapOptions = {
         zoom: 5,
-        center: new google.maps.LatLng(0.1750, 118.8283)
+        //center: new google.maps.LatLng(0.1750, 118.8283)
+        center: new google.maps.LatLng(0, 0)
       };
 
       map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
       
       google.maps.event.addListener(map, 'click', addLatLng);
       getApoteks();
-      //getViruses();
+      getViruses();
       //getInfected();
     }
 
@@ -89,7 +90,10 @@
             dataType: "json",
             success: function(result){
               apoteks = result;
-              var image = 'img/angel.png';
+              var markerImage = new google.maps.MarkerImage('img/angel.png',
+                new google.maps.Size(20, 31),
+                new google.maps.Point(0, 0),
+                new google.maps.Point(10, 15));
 
               for (var i in apoteks) {
                 console.log(new google.maps.LatLng(parseFloat(apoteks[i].lat),parseFloat(apoteks[i].lng)));
@@ -97,7 +101,7 @@
                   position: new google.maps.LatLng(parseFloat(apoteks[i].lat),parseFloat(apoteks[i].lng)),
                   map: map,
                   visible: true,
-                  //icon: image,
+                  icon: markerImage,
                   title: apoteks[i].name
                 });
               }
@@ -119,15 +123,18 @@
             dataType: "json",
             success: function(result){
               viruses = result;
-              var image = 'img/devil.png';
+              var markerImage = new google.maps.MarkerImage('img/devil.png',
+                new google.maps.Size(20, 20),
+                new google.maps.Point(0, 0),
+                new google.maps.Point(10, 10));
           
               for (var i in viruses) {
                 var options = {
                   strokeColor: '#FF0000',
-                  strokeOpacity: 0.8,
-                  strokeWeight: 2,
+                  strokeOpacity: 0.4,
+                  strokeWeight: 1,
                   fillColor: '#FF0000',
-                  fillOpacity: 0.35,
+                  fillOpacity: 0.15,
                   map: map,
                   center: new google.maps.LatLng(parseFloat(viruses[i].lat),parseFloat(viruses[i].lng)),
                   radius: 111302.62
@@ -137,7 +144,7 @@
                 var marker = new google.maps.Marker({
                   position: new google.maps.LatLng(parseFloat(viruses[i].lat),parseFloat(viruses[i].lng)),
                   map: map,
-                  icon: image,
+                  icon: markerImage,
                   title: "TarikMang Virus"
                 });
               }
