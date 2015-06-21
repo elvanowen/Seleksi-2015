@@ -26,13 +26,13 @@ app.get('/apoteks', function (req, res) {
     child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase getApoteks", function (error, stdout, stderr) {
         var temp = [];
         var data = stdout.split("\n");
-console.log(stdout);
+//console.log(stdout);
         for (var i=0;i<data.length-1;i++){
             var name = data[i].split(",")[0];
             var sub = data[i].split(",")[1].split(" ");
             var lng = sub[0].substring(6);
             var lat = sub[1].substring(0,sub[1].length-1);
-            console.log("name: " + name + "lat: " + lat + "lng: " + lng);
+            //console.log("name: " + name + "lat: " + lat + "lng: " + lng);
             temp.push({name: name, lat: lat, lng: lng});
         } 
 
@@ -50,7 +50,7 @@ app.get('/viruses', function (req, res) {
             var sub = data[i].split(" ");
             var lng = sub[0].substring(6);
             var lat = sub[1].substring(0,sub[1].length-1);
-            console.log("lat: " + lat + "lng: " + lng);
+            //console.log("lat: " + lat + "lng: " + lng);
             temp.push({lat: lat, lng: lng});
         } 
 
@@ -58,31 +58,32 @@ app.get('/viruses', function (req, res) {
     });
 });
 
-app.get('/infected', function (req, res) {
+app.post('/infected', function (req, res) {
     console.log("/infected");
     var body = req.body;
     
     var lat = body.lat;
     var lng = body.lng;
-    console.log(lat);
-    console.log(lng);  
+    console.log("Checking Infection at lat : " + parseFloat(lat) + " lng : " + parseFloat(lng)); 
 
     child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase getInfected " + lat + " " + lng, function (error, stdout, stderr) {
         if (error !== null) {
             console.log('exec error: ' + error);
+            es.send(JSON.stringify({success:"0"}));
+            process.exit(1);
         }else{
-            var temp = {};
-            var data = stdout.split("\n");
-
-            if (data[0].equals("true")){
-                var sub = data[1].split(" ");
-                var lng = sub[i][0].substring(6);
-                var lat = sub[i][1].substring(0,sub[i][1].length-1);
-                console.log("lat: " + lat + "lng: " + lng);
-                temp = {lat: lat, lng: lng};
+            console.log(stdout);
+            if (!stdout.equals("")){
+                var temp = stdout.split(",");
+                var name = temp[0];
+                var lng = temp[1].split(" ")[0].substring(6);
+                var lat = temp[1].split(" ")[1].substring(0, temp[1].split(" ")[1].length-1);
+                var dist = temp[2];
+                res.send(JSON.stringify({success:"1", data:{name:name, lat:lat, lng:lng, dist:dist}}));    
+            }else{
+                res.send(JSON.stringify({success:"1", data:{}}));    
             }
-
-            res.send(JSON.stringify(temp));
+            
         }
     });
 });
@@ -90,22 +91,22 @@ app.get('/infected', function (req, res) {
 app.post('/add', function (req, res) {
     console.log("/addViruses");
     var body = req.body;
-    
-    for (i in body){
-        var lng = body[i].lat;
-        var lat = body[i].lng;
-        console.log(lat);
-        console.log(lng);   
-    
+    console.log(body);
 
-        child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase addViruses " + lat + " " + lng, function (error, stdout, stderr) {
+    for (i in body){
+        var lat = body[i].lat;
+        var lng = body[i].lng;
+        console.log("Adding lat : " + parseFloat(lat) + " lng : " + parseFloat(lng));
+    
+        child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase addViruses " + lng + " " + lat, function (error, stdout, stderr) {
             if (error !== null) {
                 console.log('exec error: ' + error);
-            }else{
-                res.send(stdout);
+                res.send(JSON.stringify({success:"0"}));
+                process.exit(1);
             }
         });
     }
+    res.send(JSON.stringify({success:"1"}));
 });
 
 var server = app.listen(8080, function () {

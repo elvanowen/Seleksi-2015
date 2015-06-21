@@ -10,14 +10,23 @@
         margin: 0px;
         padding: 0px;
       }
-      button{
-          z-index: 100;
-          position: relative;
-          top: 10px;
-          left: 10px;
+      button, span{
+        z-index: 100;
+        position: relative;
+        top: 10px;
+        left: 10px;
       }
       #add-virus{
-          margin-right: 20px;
+        margin-right: 20px;
+      }
+      #info-text{
+        background-color: white;
+        display: inline-block;
+        padding-top: 5px;
+        height: 33px;
+        padding-left: 50px;
+        padding-right: 50px;
+        color: #006dcc;
       }
     </style>
     <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.min.css">
@@ -28,32 +37,53 @@
     var map;
     var addVirus = 0;
     var markers = [];
-    var apoteks, viruses;
+    var circles = [];
+    var markersPosition = [];
+    var apoteks, viruses, myPosition;
 
     function initialize() {
       var mapOptions = {
         zoom: 5,
         center: new google.maps.LatLng(0.1750, 118.8283)
-        //center: new google.maps.LatLng(0, 0)
       };
 
       map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
       
       google.maps.event.addListener(map, 'click', addLatLng);
-      getApoteks();
-      getViruses();
-      //getInfected();
+      //getApoteks();
+      //getViruses();
+      init_infected();
     }
 
     function addLatLng(event) {
         if (addVirus === 1){
+            var markerImage = new google.maps.MarkerImage('img/devil.png',
+                new google.maps.Size(20, 20),
+                new google.maps.Point(0, 0),
+                new google.maps.Point(10, 10));
+            
+            var options = {
+                strokeColor: '#FF0000',
+                strokeOpacity: 0.4,
+                strokeWeight: 1,
+                fillColor: '#FF0000',
+                fillOpacity: 0.15,
+                map: map,
+                center: event.latLng,
+                radius: 111302.62
+            };
+            var newCircle = new google.maps.Circle(options);
+
             var marker = new google.maps.Marker({
               position: event.latLng,
-              title: "TarikMang Virus",
-              map: map
+              map: map,
+              icon: markerImage,
+              title: "TarikMang Virus"
             });
-            
+
+            circles.push(newCircle);
             markers.push(marker);
+            markersPosition.push({lat:event.latLng.A.toString(), lng:event.latLng.F.toString()});
             console.log(event.latLng);
         }
     }
@@ -63,6 +93,7 @@
         if (addVirus === 0){
             for (var i = 0; i < markers.length; i++) {
               markers[i].setMap(null);
+              circles[i].setMap(null);
             }
 
             markers = [];
@@ -77,8 +108,11 @@
     }
 
     function addViruses(){
-        console.log(markersPosition);
+        console.log(markers);
         postViruses();
+        markers = [];
+        markersPosition = [];
+        circles = [];
         toggleAddVirus();
     }
   
@@ -159,18 +193,69 @@
             }
         });
     }
-  
+
+    function init_infected(){
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                  myPosition = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+                  getInfected();
+                }, function() {
+                      var latitude = prompt("Please enter your Latitude", "0.1750"); 
+                      var longitude = prompt("Please enter your Longitude", "118.8283");
+
+                      while (longitude == NaN || latitude == NaN){
+                        latitude = prompt("Please enter your Latitude", "0.1750"); 
+                        longitude = prompt("Please enter your Longitude", "118.8283");        
+                      }
+                      myPosition = new google.maps.LatLng(parseFloat(latitude),parseFloat(longitude));
+                      getInfected();
+            });
+        }else{
+            var latitude = prompt("Please enter your Latitude", "0.1750"); 
+            var longitude = prompt("Please enter your Longitude", "118.8283");
+
+            while (longitude == NaN || latitude == NaN){
+              latitude = prompt("Please enter your Latitude", "0.1750"); 
+              longitude = prompt("Please enter your Longitude", "118.8283");        
+            }
+            myPosition = new google.maps.LatLng(parseFloat(latitude),parseFloat(longitude));
+            getInfected();
+        }
+    }
+
     function getInfected(){
+        console.log("myPosition");
+        console.log(myPosition);
+
+        var marker = new google.maps.Marker({
+          position: myPosition,
+          map: map,
+          title: "You are here"
+        });
+
         console.log("getInfected");
         $.ajax({
-            url: 'http://localhost:8080/nearestApotek',
-            type: "GET",
-            //dataType: "json",
+            url: 'http://localhost:8080/infected',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({lat: myPosition.A.toString(), lng:myPosition.F.toString()}),
             success: function(result){
-              //apoteks = result;
-              console.log(result);
-          
-              
+              if (!jQuery.isEmptyObject(result.data)){
+                  console.log(result);
+                  console.log(new google.maps.LatLng(parseFloat(result.data.lat), parseFloat(result.data.lng)));
+
+                  marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(parseFloat(result.data.lat), parseFloat(result.data.lng)),
+                    map: map,
+                    icon: 'img/heart.png',
+                    title: "Nearest Apotik : " + result.data.name + " distance : " + result.data.dist.split("\n")[0] + " kilometers"
+                  });
+
+                  $('#info-text').text("Nearest Apotik : " + result.data.name + " distance : " + result.data.dist.split("\n")[0] + " kilometers");
+              }else{
+                  $('#info-text').text("You are not infected by Tarik Mang Virus");
+              }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
             },
@@ -183,12 +268,15 @@
   
     function postViruses(){
         console.log("postViruses");
+        var dataToSend = JSON.stringify(markersPosition);
+        console.log(dataToSend);
         $.ajax({
-            url: 'http://localhost:8080/addViruses',
+            url: 'http://localhost:8080/add',
             type: "POST",
-            //dataType: "json",
+            dataType: "json",
+            contentType: "application/json",
+            data: dataToSend,
             success: function(result){
-              //apoteks = result;
               console.log(result);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -199,6 +287,7 @@
             }
         });
     }
+
     google.maps.event.addDomListener(window, 'load', initialize);
   </script>
   </head>
@@ -207,6 +296,7 @@
       <button id="add-virus" onclick="toggleAddVirus()" class="btn btn-primary">Add Virus</button>
       <button id="done" onclick="addViruses()" class="btn btn-success" style="display:none; margin-right:10px">Done</button>
       <button id="cancel" onclick="toggleAddVirus()" class="btn btn-danger" style="display:none">Cancel</button>
+      <span id="info-text">Checking if you are infected. Please Wait.. </span>
     </div>
     <div id="map-canvas"></div>
   </body>

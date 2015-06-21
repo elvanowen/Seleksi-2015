@@ -17,7 +17,7 @@ import java.util.regex.*;
  * @author KEVIN
  */
 public class SpatialDatabase {
-    protected static String username = "elvan_owen";
+    protected static String username = "postgres";
     protected static String password = "";
     protected static Connection connection =   null;
     protected static Statement sql    = null;
@@ -48,13 +48,13 @@ public class SpatialDatabase {
         try {
             data.next();
             double shortestdistance = currentpoint.distance(((PGgeometry)data.getObject(2)).getGeometry().getFirstPoint());
-            result = data.getString(1) + "," + data.getString(2) + "," + shortestdistance;
+            result = data.getString(1) + "," + data.getString(3) + "," + shortestdistance;
             while (data.next()){
                 Point temppoint = ((PGgeometry) data.getObject(2)).getGeometry().getFirstPoint();
                 double tempdistance = currentpoint.distance(temppoint);
                 if (shortestdistance > tempdistance){
                     shortestdistance = tempdistance;
-                    result = data.getString(1) + "," + data.getString(2) + "," + shortestdistance;
+                    result = data.getString(1) + "," + data.getString(3) + "," + shortestdistance;
                 }
             }
         } catch (SQLException ex) {
@@ -120,13 +120,10 @@ public class SpatialDatabase {
 
                 sql = connection.createStatement();
 
-                apotik = sql.executeQuery("SELECT name, geom FROM  apotik");
-                if (CheckInfection(apotik, x, y)){
-                    String temp = FindShortest(apotik, x, y);
-                    System.out.println("true");
+                apotik = sql.executeQuery("SELECT name, geom, ST_AsText(geom) FROM  apotik");
+                if (CheckInfection(apotik, y, x)){
+                    String temp = FindShortest(apotik, y, x);
                     System.out.println(temp);
-                }else{
-                    System.out.println("false");
                 }
             }    
             catch (SQLException e){
@@ -134,8 +131,8 @@ public class SpatialDatabase {
             }
 
         }else if (args[0].equals("addViruses")){
-            double x = Double.parseDouble(args[2]);
-            double y = Double.parseDouble(args[3]);
+            double x = Double.parseDouble(args[1]);
+            double y = Double.parseDouble(args[2]);
             AddVirus(x, y);
         } 
    }
