@@ -73,7 +73,7 @@ app.post('/infected', function (req, res) {
             process.exit(1);
         }else{
             console.log(stdout);
-            if (!stdout.equals("")){
+            if (stdout !== ""){
                 var temp = stdout.split(",");
                 var name = temp[0];
                 var lng = temp[1].split(" ")[0].substring(6);
