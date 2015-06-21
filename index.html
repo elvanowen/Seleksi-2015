@@ -33,8 +33,8 @@
     function initialize() {
       var mapOptions = {
         zoom: 5,
-        //center: new google.maps.LatLng(0.1750, 118.8283)
-        center: new google.maps.LatLng(0, 0)
+        center: new google.maps.LatLng(0.1750, 118.8283)
+        //center: new google.maps.LatLng(0, 0)
       };
 
       map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -90,6 +90,7 @@
             dataType: "json",
             success: function(result){
               apoteks = result;
+              console.log(apoteks);
               var markerImage = new google.maps.MarkerImage('img/angel.png',
                 new google.maps.Size(20, 31),
                 new google.maps.Point(0, 0),
@@ -123,6 +124,7 @@
             dataType: "json",
             success: function(result){
               viruses = result;
+              console.log(viruses);
               var markerImage = new google.maps.MarkerImage('img/devil.png',
                 new google.maps.Size(20, 20),
                 new google.maps.Point(0, 0),

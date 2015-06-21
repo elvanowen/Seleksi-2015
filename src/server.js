@@ -7,10 +7,18 @@ var app = express();
 var child;
 var appName = "Spatial Database";
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,POST');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+}
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
+app.use(allowCrossDomain);
 
 app.get('/apoteks', function (req, res) {
     console.log("/apoteks");
@@ -22,8 +30,8 @@ console.log(stdout);
         for (var i=0;i<data.length-1;i++){
             var name = data[i].split(",")[0];
             var sub = data[i].split(",")[1].split(" ");
-            var lat = sub[0].substring(7);
-            var lng = sub[1].substring(0,sub[1].length-1);
+            var lng = sub[0].substring(6);
+            var lat = sub[1].substring(0,sub[1].length-1);
             console.log("name: " + name + "lat: " + lat + "lng: " + lng);
             temp.push({name: name, lat: lat, lng: lng});
         } 
@@ -40,8 +48,8 @@ app.get('/viruses', function (req, res) {
 
         for (var i=0;i<data.length-1;i++){
             var sub = data[i].split(" ");
-            var lat = sub[0].substring(7);
-            var lng = sub[1].substring(0,sub[1].length-1);
+            var lng = sub[0].substring(6);
+            var lat = sub[1].substring(0,sub[1].length-1);
             console.log("lat: " + lat + "lng: " + lng);
             temp.push({lat: lat, lng: lng});
         } 
@@ -68,8 +76,8 @@ app.get('/infected', function (req, res) {
 
             if (data[0].equals("true")){
                 var sub = data[1].split(" ");
-                var lat = sub[i][0].substring(7);
-                var lng = sub[i][1].substring(0,sub[i][1].length-1);
+                var lng = sub[i][0].substring(6);
+                var lat = sub[i][1].substring(0,sub[i][1].length-1);
                 console.log("lat: " + lat + "lng: " + lng);
                 temp = {lat: lat, lng: lng};
             }
@@ -84,8 +92,8 @@ app.post('/add', function (req, res) {
     var body = req.body;
     
     for (i in body){
-        var lat = body[i].lat;
-        var lng = body[i].lng;
+        var lng = body[i].lat;
+        var lat = body[i].lng;
         console.log(lat);
         console.log(lng);   
     
