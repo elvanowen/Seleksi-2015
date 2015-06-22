@@ -84,7 +84,6 @@
             circles.push(newCircle);
             markers.push(marker);
             markersPosition.push({lat:event.latLng.A.toString(), lng:event.latLng.F.toString()});
-            console.log(event.latLng);
         }
     }
 
@@ -118,21 +117,18 @@
     }
   
     function getApoteks(){
-        console.log("getApoteks");
         $.ajax({
             url: 'http://localhost:8080/apoteks',
             type: "GET",
             dataType: "json",
             success: function(result){
               apoteks = result;
-              console.log(apoteks);
               var markerImage = new google.maps.MarkerImage('img/angel.png',
                 new google.maps.Size(20, 31),
                 new google.maps.Point(0, 0),
                 new google.maps.Point(10, 15));
 
               for (var i in apoteks) {
-                console.log(new google.maps.LatLng(parseFloat(apoteks[i].lat),parseFloat(apoteks[i].lng)));
                 var marker = new google.maps.Marker({
                   position: new google.maps.LatLng(parseFloat(apoteks[i].lat),parseFloat(apoteks[i].lng)),
                   map: map,
@@ -152,14 +148,12 @@
     }
   
     function getViruses(){
-        console.log("getViruses");
         $.ajax({
             url: 'http://localhost:8080/viruses',
             type: "GET",
             dataType: "json",
             success: function(result){
               viruses = result;
-              console.log(viruses);
               var markerImage = new google.maps.MarkerImage('img/devil.png',
                 new google.maps.Size(20, 20),
                 new google.maps.Point(0, 0),
@@ -204,9 +198,9 @@
                       var latitude = prompt("Please enter your Latitude", "0.1750"); 
                       var longitude = prompt("Please enter your Longitude", "118.8283");
 
-                      while (longitude == NaN || latitude == NaN){
-                        latitude = prompt("Please enter your Latitude", "0.1750"); 
-                        longitude = prompt("Please enter your Longitude", "118.8283");        
+                      while (longitude == "" || latitude == ""){
+                        latitude = prompt("Please re-enter your Latitude", "0.1750"); 
+                        longitude = prompt("Please re-enter your Longitude", "118.8283");        
                       }
                       myPosition = new google.maps.LatLng(parseFloat(latitude),parseFloat(longitude));
                       getInfected();
@@ -215,9 +209,9 @@
             var latitude = prompt("Please enter your Latitude", "0.1750"); 
             var longitude = prompt("Please enter your Longitude", "118.8283");
 
-            while (longitude == NaN || latitude == NaN){
-              latitude = prompt("Please enter your Latitude", "0.1750"); 
-              longitude = prompt("Please enter your Longitude", "118.8283");        
+            while (longitude == "" || latitude == ""){
+              latitude = prompt("Please re-enter your Latitude", "0.1750"); 
+              longitude = prompt("Please re-enter your Longitude", "118.8283");        
             }
             myPosition = new google.maps.LatLng(parseFloat(latitude),parseFloat(longitude));
             getInfected();
@@ -225,16 +219,13 @@
     }
 
     function getInfected(){
-        console.log("myPosition");
-        console.log(myPosition);
-
         var marker = new google.maps.Marker({
           position: myPosition,
           map: map,
           title: "You are here"
         });
+        console.log(JSON.stringify({lat: myPosition.A.toString(), lng:myPosition.F.toString()}));
 
-        console.log("getInfected");
         $.ajax({
             url: 'http://localhost:8080/infected',
             type: "POST",
@@ -242,10 +233,8 @@
             contentType: "application/json",
             data: JSON.stringify({lat: myPosition.A.toString(), lng:myPosition.F.toString()}),
             success: function(result){
+              console.log(result);
               if (!jQuery.isEmptyObject(result.data)){
-                  console.log(result);
-                  console.log(new google.maps.LatLng(parseFloat(result.data.lat), parseFloat(result.data.lng)));
-
                   marker = new google.maps.Marker({
                     position: new google.maps.LatLng(parseFloat(result.data.lat), parseFloat(result.data.lng)),
                     map: map,
@@ -268,9 +257,7 @@
     }
   
     function postViruses(){
-        console.log("postViruses");
         var dataToSend = JSON.stringify(markersPosition);
-        console.log(dataToSend);
         $.ajax({
             url: 'http://localhost:8080/add',
             type: "POST",
@@ -278,7 +265,6 @@
             contentType: "application/json",
             data: dataToSend,
             success: function(result){
-              console.log(result);
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {
             },
