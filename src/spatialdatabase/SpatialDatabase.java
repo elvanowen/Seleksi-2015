@@ -18,6 +18,7 @@ import java.util.regex.*;
  */
 public class SpatialDatabase {
     protected static String username = "postgres";
+    protected static double virusrange = 111302.62;
     protected static String password = "";
     protected static Connection connection =   null;
     protected static Statement sql    = null;
@@ -25,42 +26,39 @@ public class SpatialDatabase {
     protected static ResultSet virus = null;
     protected static String url = "jdbc:postgresql://localhost:5432/indonesia_map";
 
-    public static boolean CheckInfection(ResultSet data, double x, double y){
-        boolean infected = false;
-        Point currentpoint = new Point(x,y);
-        double virusrange = 111302.62;
+    public static boolean CheckInfection(double x, double y){
         try{
-            while (data.next() && !(infected)){
-                Point temppoint = ((PGgeometry) data.getObject(2)).getGeometry().getFirstPoint();
-                double tempdistance = currentpoint.distance(temppoint);
-                if (tempdistance <= virusrange)
-                    infected = true;
+            connection = DriverManager.getConnection(url, username,password);
+
+            sql = connection.createStatement();
+
+            virus = sql.executeQuery("SELECT ST_AsText(geom) FROM virus_tarikmang WHERE ST_Distance(ST_Transform(ST_GeomFromText('POINT(" + x + " " + y + ")',4326),26986),ST_Transform(geom,26986)) <= " + virusrange + ";");
+            if (virus.next()){
+                return true;
             }
+        }    
+        catch (SQLException e){
+          System.out.println("Error " +e);
         }
-        catch (SQLException ex){
-        }
-        return infected;
+        return false;
     }
-        
-    public static String FindShortest(ResultSet data, double x, double y){
+
+    public static String FindShortest(double x, double y){
         String result = null;
-        Point currentpoint = new Point(x,y);
-        try {
-            data.next();
-            double shortestdistance = currentpoint.distance(((PGgeometry)data.getObject(2)).getGeometry().getFirstPoint());
-            result = data.getString(1) + "," + data.getString(3) + "," + shortestdistance;
-            while (data.next()){
-                Point temppoint = ((PGgeometry) data.getObject(2)).getGeometry().getFirstPoint();
-                double tempdistance = currentpoint.distance(temppoint);
-                if (shortestdistance > tempdistance){
-                    shortestdistance = tempdistance;
-                    result = data.getString(1) + "," + data.getString(3) + "," + shortestdistance;
-                }
+        try{
+            connection = DriverManager.getConnection(url, username,password);
+
+            sql = connection.createStatement();
+
+            apotik = sql.executeQuery("SELECT distinct name, ST_AsText(geom), (SELECT min(ST_Distance(ST_Transform(ST_GeomFromText('POINT(" + x + " " + y + ")',4326),26986),ST_Transform(geom,26986))) FROM apotik)FROM apotik WHERE ST_Distance(ST_Transform(ST_GeomFromText('POINT(" + x + " " + y + ")',4326),26986),ST_Transform(geom,26986)) = (SELECT min(ST_Distance(ST_Transform(ST_GeomFromText('POINT(" + x + " " + y + ")',4326),26986),ST_Transform(geom,26986))) FROM apotik);");
+            if (apotik.next()){
+                result = apotik.getString(1) + "," + apotik.getString(2) + "," + apotik.getString(3);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(SpatialDatabase.class.getName()).log(Level.SEVERE, null, ex);
+        }    
+        catch (SQLException e){
+          System.out.println("Error " +e);
         }
-    return result;
+        return result;
     }
     
     public static void AddVirus(double x , double y){
@@ -115,21 +113,10 @@ public class SpatialDatabase {
             double x = Double.parseDouble(args[1]);
             double y = Double.parseDouble(args[2]);
 
-            try{
-                connection = DriverManager.getConnection(url, username,password);
-
-                sql = connection.createStatement();
-
-                apotik = sql.executeQuery("SELECT name, geom, ST_AsText(geom) FROM  apotik");
-                if (CheckInfection(apotik, y, x)){
-                    String temp = FindShortest(apotik, y, x);
-                    System.out.println(temp);
-                }
-            }    
-            catch (SQLException e){
-              System.out.println("Error " +e);
+            if (CheckInfection(y, x)){
+                String temp = FindShortest(y, x);
+                System.out.println(temp);
             }
-
         }else if (args[0].equals("addViruses")){
             double x = Double.parseDouble(args[1]);
             double y = Double.parseDouble(args[2]);

@@ -161,11 +161,11 @@
           
               for (var i in viruses) {
                 var options = {
-                  strokeColor: '#FF0000',
-                  strokeOpacity: 0.4,
+                  strokeColor: '#FFFFFF',
+                  strokeOpacity: 0.7,
                   strokeWeight: 1,
-                  fillColor: '#FF0000',
-                  fillOpacity: 0.15,
+                  fillColor: '#b20000',
+                  fillOpacity: 0.4,
                   map: map,
                   center: new google.maps.LatLng(parseFloat(viruses[i].lat),parseFloat(viruses[i].lng)),
                   radius: 111302.62
@@ -222,6 +222,7 @@
         var marker = new google.maps.Marker({
           position: myPosition,
           map: map,
+          icon: 'img/location.png',
           title: "You are here"
         });
         console.log(JSON.stringify({lat: myPosition.A.toString(), lng:myPosition.F.toString()}));
@@ -239,10 +240,10 @@
                     position: new google.maps.LatLng(parseFloat(result.data.lat), parseFloat(result.data.lng)),
                     map: map,
                     icon: 'img/heart.png',
-                    title: "Nearest Apotik : " + result.data.name + " distance : " + result.data.dist.split("\n")[0] + " kilometers"
+                    title: "Nearest Apotik : " + result.data.name + " distance : " + result.data.dist.split("\n")[0] + " meters"
                   });
 
-                  $('#info-text').text("Nearest Apotik : " + result.data.name + " distance : " + result.data.dist.split("\n")[0] + " kilometers");
+                  $('#info-text').text("Nearest Apotik : " + result.data.name + " distance : " + result.data.dist.split("\n")[0] + " meters");
               }else{
                   $('#info-text').text("You are not infected by Tarik Mang Virus");
               }
