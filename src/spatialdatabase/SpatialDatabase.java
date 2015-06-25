@@ -19,7 +19,7 @@ import java.util.regex.*;
 public class SpatialDatabase {
     protected static String username = "postgres";
     protected static double virusrange = 111302.62;
-    protected static String password = "";
+    protected static String password = "kenk3n1x";
     protected static Connection connection =   null;
     protected static Statement sql    = null;
     protected static ResultSet apotik = null;

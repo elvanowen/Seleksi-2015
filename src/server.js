@@ -23,7 +23,7 @@ app.use(allowCrossDomain);
 app.get('/apoteks', function (req, res) {
     console.log("/apoteks");
 
-    child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase getApoteks", function (error, stdout, stderr) {
+    child = exec("java -cp jar/postgis.jar;jar/postgresql-9.4-1201.jdbc4.jar;. spatialdatabase.SpatialDatabase getApoteks", function (error, stdout, stderr) {
         var temp = [];
         var data = stdout.split("\n");
 //console.log(stdout);
@@ -42,7 +42,7 @@ app.get('/apoteks', function (req, res) {
 
 app.get('/viruses', function (req, res) {
     console.log("/viruses");
-    child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase getViruses", function (error, stdout, stderr) {
+    child = exec("java -cp jar/postgis.jar;jar/postgresql-9.4-1201.jdbc4.jar;. spatialdatabase.SpatialDatabase getViruses", function (error, stdout, stderr) {
         var temp = [];
         var data = stdout.split("\n");
 
@@ -66,7 +66,7 @@ app.post('/infected', function (req, res) {
     var lng = body.lng;
     console.log("Checking Infection at lat : " + parseFloat(lat) + " lng : " + parseFloat(lng)); 
 
-    child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase getInfected " + lat + " " + lng, function (error, stdout, stderr) {
+    child = exec("java -cp jar/postgis.jar;jar/postgresql-9.4-1201.jdbc4.jar;. spatialdatabase.SpatialDatabase getInfected " + lat + " " + lng, function (error, stdout, stderr) {
         if (error !== null) {
             console.log('exec error: ' + error);
             es.send(JSON.stringify({success:"0"}));
@@ -98,7 +98,7 @@ app.post('/add', function (req, res) {
         var lng = body[i].lng;
         console.log("Adding lat : " + parseFloat(lat) + " lng : " + parseFloat(lng));
     
-        child = exec("java -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar:. spatialdatabase.SpatialDatabase addViruses " + lng + " " + lat, function (error, stdout, stderr) {
+        child = exec("java -cp jar/postgis.jar;jar/postgresql-9.4-1201.jdbc4.jar;. spatialdatabase.SpatialDatabase addViruses " + lng + " " + lat, function (error, stdout, stderr) {
             if (error !== null) {
                 console.log('exec error: ' + error);
                 res.send(JSON.stringify({success:"0"}));
@@ -112,7 +112,7 @@ app.post('/add', function (req, res) {
 var server = app.listen(8080, function () {
     var port = server.address().port;
 
-    child = exec("javac -cp jar/postgis.jar:jar/postgresql-9.4-1201.jdbc4.jar spatialdatabase/SpatialDatabase.java", function (error, stdout, stderr) {
+    child = exec("javac -cp jar/postgis.jar;jar/postgresql-9.4-1201.jdbc4.jar spatialdatabase/SpatialDatabase.java", function (error, stdout, stderr) {
         if (error !== null || stdout !== "") {
             console.log('exec error: ' + error);
             console.log(stdout);
