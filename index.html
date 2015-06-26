@@ -168,7 +168,7 @@
                   fillOpacity: 0.4,
                   map: map,
                   center: new google.maps.LatLng(parseFloat(viruses[i].lat),parseFloat(viruses[i].lng)),
-                  radius: 111302.62
+                  radius: 90000
                 };
                 new google.maps.Circle(options);
 
@@ -285,6 +285,7 @@
       <button id="done" onclick="addViruses()" class="btn btn-success" style="display:none; margin-right:10px">Done</button>
       <button id="cancel" onclick="toggleAddVirus()" class="btn btn-danger" style="display:none">Cancel</button>
       <span id="info-text">Checking if you are infected. Please Wait.. </span>
+	  <span id="info-text"> Evil is the TarikMang Virus and angel is the Barokah Clinic</span>
     </div>
     <div id="map-canvas"></div>
   </body>
